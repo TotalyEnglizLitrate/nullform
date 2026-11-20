@@ -32,6 +32,7 @@ const SQL_ERRORS: Record<string, number> = {
   leaf_count_mismatch: 409,
   submissions_closed: 403,
   already_submitted: 409,
+  already_anchored: 409,
 }
 
 export function sqlError(message: string): HttpError {
