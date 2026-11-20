@@ -1,6 +1,7 @@
 import { supabase } from "./lib/supabase.js"
 import { href, useRoute } from "./lib/router.js"
 import { useSession } from "./lib/session.js"
+import { Audit } from "./pages/Audit.js"
 import { Builder } from "./pages/Builder.js"
 import { Dashboard } from "./pages/Dashboard.js"
 import { FormPage } from "./pages/FormPage.js"
@@ -28,6 +29,7 @@ export function App() {
         {section === "dashboard" ? <Dashboard />
           : section === "new" ? <Builder />
           : section === "edit" && id ? <Builder formId={id} />
+          : section === "audit" && id ? <Audit formId={id} />
           : section === "f" && id ? <FormPage formId={id} />
           : <Home />}
       </main>

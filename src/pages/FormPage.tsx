@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase.js"
 import { useSession } from "../lib/session.js"
 import type { Form } from "../lib/types.js"
+import { href } from "../lib/router.js"
 import { Register } from "./Register.js"
 import { Submit } from "./Submit.js"
 
@@ -22,6 +23,8 @@ export function FormPage({ formId }: { formId: string }) {
       <h1>{form.title}</h1>
       <p><span className="badge">{form.status}</span> <span className="muted">
         {form.leaf_count !== null && `${form.leaf_count} members · `}{form.schema.questions.length} question(s)</span></p>
+      {(form.status === "frozen" || form.status === "closed") && form.root &&
+        <p><a href={href(`/audit/${form.id}`)}>Audit this form</a></p>}
       {form.status === "draft" && <p className="muted">Draft: only you can see this.</p>}
       {form.status === "registration" && <Register form={form} />}
       {form.status === "frozen" && form.root && <Submit form={form} />}

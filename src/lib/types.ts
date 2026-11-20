@@ -15,4 +15,6 @@ export interface Form {
   schema_hash: string | null
   root: string | null
   leaf_count: number | null
+  anchor_chain: string | null
+  anchor_tx: string | null
 }
