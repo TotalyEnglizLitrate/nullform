@@ -69,6 +69,10 @@ alter default privileges in schema public revoke all on tables from anon, authen
 alter default privileges in schema public revoke all on functions from public, anon, authenticated;
 revoke all on all tables in schema public from anon, authenticated;
 
+-- The server (Vercel functions) uses the service role; make its access explicit.
+alter default privileges in schema public grant select, insert, update, delete on tables to service_role;
+grant select, insert, update, delete on all tables in schema public to service_role;
+
 grant select on public.forms, public.commitments, public.receipts to anon, authenticated;
 grant insert, update, delete on public.forms to authenticated;
 grant select on public.registrations, public.answers to authenticated;
