@@ -1,7 +1,8 @@
 import { Identity } from "@semaphore-protocol/identity"
 import { verifyProof } from "@semaphore-protocol/proof"
 import { describe, expect, it } from "vitest"
-import { checkBinding, checkGroup, computeRoot, explorerTx, type Receipt } from "../src/lib/audit.js"
+import { encodeAnchorData } from "../shared/anchor.js"
+import { checkAnchor, checkBinding, checkGroup, computeRoot, explorerTx, type Receipt } from "../src/lib/audit.js"
 import { scopeFromFormId, signalFromPayload } from "../shared/hash.js"
 import { makeProof } from "./helpers.js"
 
@@ -47,6 +48,29 @@ describe("receipt binding and proof verification (real proof)", () => {
     expect(await checkBinding(form, { ...receipt, nullifier: "1" })).toMatch(/nullifier/)
     expect(await verifyProof({ ...proof, message: "1" })).toBe(false)
     expect(await scopeFromFormId(FORM)).toBe(proof.scope)
+  })
+})
+
+describe("anchor checks", () => {
+  const root = computeRoot(leaves)
+  const form = { id: FORM, root }
+  const wallet = "0xAbCdEf0000000000000000000000000000000001"
+  const tx = (o: object = {}) => ({ from: wallet, to: wallet.toLowerCase(), input: encodeAnchorData(FORM, root),
+    blockNumber: "0x10", timestamp: 1_700_000_000, ...o })
+  const failing = (t: ReturnType<typeof tx> | null, sender?: string) => checkAnchor(form, t, sender).filter((c) => !c.ok).map((c) => c.name)
+
+  it("passes for a genuine anchor", () => {
+    expect(failing(tx())).toEqual([])
+    expect(failing(tx(), wallet.toLowerCase())).toEqual([])
+  })
+  it("fails for a missing, pending, foreign or altered transaction", () => {
+    expect(failing(null)).toEqual(["Transaction found on the chain"])
+    expect(failing(tx({ blockNumber: null }))).toEqual(["Transaction is confirmed in a block"])
+    expect(failing(tx({ input: "0xdeadbeef" }))).toContain("Calldata is a Nullform anchor")
+    expect(failing(tx({ input: encodeAnchorData("44444444-4444-4444-8444-444444444444", root) }))).toEqual(["Anchor is for this form"])
+    expect(failing(tx({ input: encodeAnchorData(FORM, "1") }))).toEqual(["Anchored root equals the published root"])
+    expect(failing(tx({ to: "0x0000000000000000000000000000000000000002" }))).toEqual(["Sent from the wallet to itself"])
+    expect(failing(tx(), "0x0000000000000000000000000000000000000009")).toEqual(["Sent by the expected anchor wallet"])
   })
 })
 

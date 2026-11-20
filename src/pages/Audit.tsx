@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { checkBinding, checkGroup, explorerTx, type Check, type Receipt } from "../lib/audit.js"
+import { checkAnchor, checkBinding, checkGroup, explorerTx, type Check, type Receipt } from "../lib/audit.js"
+import { fetchAnchorTx } from "../lib/chain.js"
 import { fetchAll, fetchLeaves } from "../lib/data.js"
 import { href } from "../lib/router.js"
 import { supabase } from "../lib/supabase.js"
@@ -17,6 +18,8 @@ export function Audit({ formId }: { formId: string }) {
   const [groupChecks, setGroupChecks] = useState<Check[] | null>(null)
   const [rows, setRows] = useState<RowState[] | null>(null)
   const [progress, setProgress] = useState<number | null>(null)
+  const [anchorChecks, setAnchorChecks] = useState<Check[] | null>(null)
+  const [anchorTime, setAnchorTime] = useState<number | null>(null)
   const [error, setError] = useState("")
 
   useEffect(() => {
@@ -49,6 +52,15 @@ export function Audit({ formId }: { formId: string }) {
         : proofs[i] ? { ok: true } : { ok: false, why: "zero-knowledge proof is invalid" }))
     } catch (e) { setError(e instanceof Error ? e.message : "Verification failed") }
     setProgress(null)
+  }
+
+  async function verifyAnchor() {
+    setError("")
+    try {
+      const t = await fetchAnchorTx(form!.anchor_chain!, form!.anchor_tx!)
+      setAnchorChecks(checkAnchor(form!, t, import.meta.env.VITE_ANCHOR_ADDRESS as string | undefined))
+      setAnchorTime(t?.timestamp ?? null)
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not reach the chain") }
   }
 
   const good = rows?.filter((r) => r.ok).length ?? 0
@@ -89,7 +101,19 @@ export function Audit({ formId }: { formId: string }) {
         <p className="mono">{leaves?.map((l) => <span key={l}>{l}<br /></span>)}</p>
       </details>
 
-      <h2>2. Verify the submissions</h2>
+      <h2>2. Verify the anchor</h2>
+      {form.anchor_tx && form.anchor_chain ? <>
+        <p className="muted">
+          The root was published in a blockchain transaction when the group froze. That makes it a public timestamp:
+          the operator can't quietly change the group afterwards. This reads the transaction from the chain and compares it.
+        </p>
+        <p><button onClick={verifyAnchor}>Check the anchor on {form.anchor_chain}</button></p>
+        {anchorChecks && <ul data-testid="anchor-checks">{anchorChecks.map((c) =>
+          <li key={c.name} className={c.ok ? "ok" : "error"}>{c.ok ? "Pass" : "Fail"}: {c.name}{c.detail && !c.ok ? ` (${c.detail})` : ""}</li>)}</ul>}
+        {anchorTime && <p className="muted">Anchored {new Date(anchorTime * 1000).toLocaleString()}.</p>}
+      </> : <p className="muted">This group has not been anchored on a chain, so its root has no independent timestamp.</p>}
+
+      <h2>3. Verify the submissions</h2>
       <p className="muted">
         {receipts?.length ?? 0} receipt(s). Each is a zero-knowledge proof that the sender belongs to this group.
         Checks run here: the proof is valid, it is for this group and this form, and it matches its published signal.
