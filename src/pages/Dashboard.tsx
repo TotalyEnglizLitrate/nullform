@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react"
 import { SignIn } from "../SignIn.js"
 import { explain, post } from "../lib/api.js"
+import { explorerTx } from "../lib/audit.js"
 import { href } from "../lib/router.js"
 import { useSession } from "../lib/session.js"
 import { supabase } from "../lib/supabase.js"
 import type { Form } from "../lib/types.js"
 
-type Action = "open" | "freeze" | "close"
+type Action = "open" | "freeze" | "anchor" | "close"
 
 export function Dashboard() {
   const session = useSession()
@@ -22,14 +23,17 @@ export function Dashboard() {
 
   async function act(form: Form, action: Action) {
     try {
-      const r = await post<{ leafCount?: number; smallGroupWarning?: boolean; problems?: string[] }>(
+      const r = await post<{ leafCount?: number; smallGroupWarning?: boolean; anchored?: boolean; anchorProblem?: string }>(
         "lifecycle", { formId: form.id, action }, token)
-      setNote({
-        id: form.id,
-        text: r.smallGroupWarning
-          ? `Frozen with only ${r.leafCount} member(s). Below ${form.min_group_size}, anonymity is weak.`
-          : "Done.",
-      })
+      const parts: string[] = []
+      if (action === "freeze") {
+        if (r.smallGroupWarning) parts.push(`Frozen with only ${r.leafCount} member(s). Below ${form.min_group_size}, anonymity is weak.`)
+        else parts.push("Frozen.")
+        if (!r.anchored) parts.push(r.anchorProblem === "not_configured"
+          ? "Anchoring isn't configured, so the root has no on-chain timestamp."
+          : "The on-chain anchor failed. Use \"Anchor now\" to retry.")
+      } else parts.push("Done.")
+      setNote({ id: form.id, text: parts.join(" ") })
     } catch (e) {
       const problems = (e as { body?: { problems?: string[] } }).body?.problems
       setNote({ id: form.id, text: problems ? problems.join("; ") : explain(e), error: true })
@@ -56,6 +60,12 @@ export function Dashboard() {
             {f.status === "draft" && <><a href={href(`/edit/${f.id}`)}>Edit</a>
               <button onClick={() => act(f, "open")}>Open registration</button></>}
             {f.status === "registration" && <button onClick={() => act(f, "freeze")}>Freeze group</button>}
+            {(f.status === "frozen" || f.status === "closed") && f.root && <a href={href(`/audit/${f.id}`)}>Audit</a>}
+            {(f.status === "frozen" || f.status === "closed") && f.root && !f.anchor_tx &&
+              <button onClick={() => act(f, "anchor")}>Anchor now</button>}
+            {f.anchor_tx && (explorerTx(f.anchor_chain, f.anchor_tx)
+              ? <a href={explorerTx(f.anchor_chain, f.anchor_tx)!} target="_blank" rel="noreferrer">Anchor tx</a>
+              : <span className="badge">anchored ({f.anchor_chain})</span>)}
             {(f.status === "registration" || f.status === "frozen") && <button onClick={() => act(f, "close")}>Close</button>}
           </div>
           {note?.id === f.id && <p className={note.error ? "error" : "muted"} role="status">{note.text}</p>}
