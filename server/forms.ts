@@ -13,6 +13,7 @@ export interface FormRow {
   min_group_size: number
   root: string | null
   leaf_count: number | null
+  anchor_tx: string | null
 }
 
 export async function loadForm(formId: unknown): Promise<FormRow> {
