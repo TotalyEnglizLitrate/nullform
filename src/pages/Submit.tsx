@@ -4,7 +4,7 @@ import { ApiError, explain, post } from "../lib/api.js"
 import { deriveIdentity } from "../lib/identity.js"
 import { loadMaster } from "../lib/keystore.js"
 import { prove, type Proof } from "../lib/prover.js"
-import { supabase } from "../lib/supabase.js"
+import { fetchLeaves } from "../lib/data.js"
 import type { Form } from "../lib/types.js"
 import { canonicalize } from "../../shared/canonical.js"
 import { scopeFromFormId, sha256Hex, signalFromPayload } from "../../shared/hash.js"
@@ -42,8 +42,7 @@ export function Submit({ form }: { form: Form }) {
 
   useEffect(() => { void loadMaster().then(setMaster) }, [])
   useEffect(() => {
-    void supabase.from("commitments").select("commitment").eq("form_id", form.id)
-      .then(({ data }) => setLeaves((data ?? []).map((r) => r.commitment as string)))
+    void fetchLeaves(form.id).then(setLeaves)
   }, [form.id])
   useEffect(() => {
     if (!master) return setCommitment(null)
