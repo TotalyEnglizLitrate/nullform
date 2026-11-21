@@ -33,6 +33,8 @@ const MESSAGES: Record<string, string> = {
   wrong_status: "That isn't possible in this form's current state.",
   empty_group: "Nobody has registered yet.",
   form_not_found: "Form not found.",
+  server_misconfigured: "The server is misconfigured, so this can't work right now. Please tell whoever runs this site.",
+  auth_unavailable: "Sign-in is unavailable right now. Please try again in a moment.",
 }
 export const explain = (e: unknown) =>
   e instanceof ApiError ? (MESSAGES[e.code] ?? `Request failed (${e.code}).`) : e instanceof Error ? e.message : "Something went wrong."

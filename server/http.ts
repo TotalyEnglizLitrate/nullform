@@ -4,6 +4,9 @@ export class HttpError extends Error {
   }
 }
 
+/** The server's own configuration is wrong (e.g. a masked or rejected service key). Never the caller's fault. */
+export class ConfigError extends Error {}
+
 export const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json", "cache-control": "no-store" } })
 
@@ -38,6 +41,10 @@ const SQL_ERRORS: Record<string, number> = {
 export function sqlError(message: string): HttpError {
   const status = SQL_ERRORS[message]
   if (status) return new HttpError(status, message)
+  if (/invalid api key/i.test(message)) {
+    console.error("Supabase rejected SUPABASE_SECRET_KEY. Is it the full key from the dashboard, not a masked copy?")
+    return new HttpError(500, "server_misconfigured")
+  }
   console.error("unexpected database error:", message)
   return new HttpError(500, "internal_error")
 }
@@ -50,6 +57,10 @@ export function handler(fn: (req: Request) => Promise<Response>) {
       return await fn(req)
     } catch (e) {
       if (e instanceof HttpError) return json(e.status, { error: e.code })
+      if (e instanceof ConfigError) {
+        console.error(e.message)
+        return json(500, { error: "server_misconfigured" })
+      }
       console.error(e)
       return json(500, { error: "internal_error" })
     }
