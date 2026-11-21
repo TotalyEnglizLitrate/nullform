@@ -81,12 +81,14 @@ export function Results({ formId }: { formId: string }) {
       <h1>Results: {form.title}</h1>
       <p><a href={href("/dashboard")}>My forms</a> · <a href={href(`/audit/${form.id}`)}>Public audit page</a></p>
       <p className="muted">Only you can see this page. Respondents are anonymous, but free-text answers can identify people by style or detail, so handle them with care.</p>
-      <p>
-        <strong data-testid="response-count">{n}</strong> response(s) from <strong>{form.leaf_count ?? "?"}</strong> registered member(s)
-        {form.leaf_count ? ` (${Math.round((n / form.leaf_count) * 100)}%)` : ""}
-      </p>
-      {form.leaf_count !== null && form.leaf_count < form.min_group_size &&
-        <p className="error">Small group: with {form.leaf_count} members, individual answers are easier to attribute.</p>}
+      {payloads !== null && <>
+        <p>
+          <strong data-testid="response-count">{n}</strong> response(s) from <strong>{form.leaf_count ?? "?"}</strong> registered member(s)
+          {form.leaf_count ? ` (${Math.round((n / form.leaf_count) * 100)}%)` : ""}
+        </p>
+        {form.leaf_count !== null && form.leaf_count < form.min_group_size &&
+          <p className="error">Small group: with {form.leaf_count} members, individual answers are easier to attribute.</p>}
+      </>}
       {error && <p className="error" role="alert">{error}</p>}
       {payloads === null ? <p className="muted">Loading…</p> : <>
         <p><button disabled={!n} onClick={download}>Download CSV</button></p>
