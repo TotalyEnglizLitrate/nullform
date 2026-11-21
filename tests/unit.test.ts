@@ -4,7 +4,7 @@ import { scopeFromFormId, schemaHash, signalFromPayload } from "../shared/hash.j
 import { FIELD, isCanonicalDecimal, isCommitment, isFieldElement, sortLeaves } from "../shared/leaves.js"
 import { validatePayload, validateSchema, type FormSchema } from "../shared/schema.js"
 import { normalizeEmail, emailProvider } from "../server/providers/email.js"
-import { githubProvider } from "../server/providers/github.js"
+import { validateEligibility } from "../server/providers/index.js"
 import type { User } from "@supabase/supabase-js"
 
 describe("canonical JSON vectors (shared by client and server)", () => {
@@ -125,43 +125,37 @@ describe("email provider", () => {
     expect(normalizeEmail("a+b+c@x.io", true)).toBe("a@x.io")
   })
   it("refuses unconfirmed addresses", () => {
-    expect(emailProvider.identify(user({ email: "a@x.io" }), { provider: "email", mode: "any" })).toBeNull()
+    expect(emailProvider.identify(user({ email: "a@x.io" }), { mode: "any" })).toBeNull()
   })
   const who = (email: string, strip = false) =>
-    emailProvider.identify(user({ email, email_confirmed_at: "t" }), { provider: "email", mode: "any", stripPlusTag: strip })!
+    emailProvider.identify(user({ email, email_confirmed_at: "t" }), { mode: "any", stripPlusTag: strip })!
   it("allowlist, domain and any", () => {
-    const allow = { provider: "email", mode: "allowlist" } as const
+    const allow = { mode: "allowlist" } as const
     expect(emailProvider.isEligible(who("A@x.io"), allow, ["a@x.io"])).toBe(true)
     expect(emailProvider.isEligible(who("b@x.io"), allow, ["a@x.io"])).toBe(false)
     expect(emailProvider.isEligible(who("a+1@x.io"), allow, ["a@x.io"])).toBe(false)
     const strip = { ...allow, stripPlusTag: true }
     expect(emailProvider.isEligible(who("a+1@x.io", true), strip, ["a@x.io"])).toBe(true)
     expect(who("a+1@x.io", true).subject).toBe(who("a+2@x.io", true).subject)
-    const dom = { provider: "email", mode: "domain" } as const
+    const dom = { mode: "domain" } as const
     expect(emailProvider.isEligible(who("a@x.io"), dom, ["x.io"])).toBe(true)
     expect(emailProvider.isEligible(who("a@x.io"), dom, ["@x.io"])).toBe(true)
     expect(emailProvider.isEligible(who("a@sub.x.io"), dom, ["x.io"])).toBe(false)
     expect(emailProvider.isEligible(who("a@evilx.io"), dom, ["x.io"])).toBe(false)
-    expect(emailProvider.isEligible(who("z@q.io"), { provider: "email", mode: "any" }, [])).toBe(true)
+    expect(emailProvider.isEligible(who("z@q.io"), { mode: "any" }, [])).toBe(true)
   })
-  it("never accepts a github policy", () => {
-    expect(emailProvider.isEligible(who("a@x.io"), { provider: "github", mode: "any" }, [])).toBe(false)
+  it("reads the verified email whichever method signed the person in", () => {
+    // Supabase merges email and GitHub sign-ins that share a verified email into one account.
+    const merged = user({
+      email: "a@x.io", email_confirmed_at: "t",
+      identities: [{ id: "1" } as never, { provider: "github", id: "42" } as never],
+    })
+    expect(emailProvider.identify(merged, { mode: "any" })).toEqual({ subject: "email:a@x.io", handle: "a@x.io" })
   })
-})
-
-describe("github provider", () => {
-  const gh = (id: string, login: string) =>
-    user({ identities: [{ provider: "github", id, identity_data: { user_name: login } } as never] })
-  it("uses the numeric id as subject and the lowercased login as handle", () => {
-    expect(githubProvider.identify(gh("42", "Octo"), { provider: "github", mode: "any" })).toEqual({
-      subject: "github:42", handle: "octo" })
-    expect(githubProvider.identify(user({}), { provider: "github", mode: "any" })).toBeNull()
-  })
-  it("allowlist by handle", () => {
-    const who = githubProvider.identify(gh("42", "Octo"), { provider: "github", mode: "any" })!
-    const p = { provider: "github", mode: "allowlist" } as const
-    expect(githubProvider.isEligible(who, p, ["octo"])).toBe(true)
-    expect(githubProvider.isEligible(who, p, ["@octo"])).toBe(true)
-    expect(githubProvider.isEligible(who, p, ["other"])).toBe(false)
+  it("validates the stored policy, ignoring any leftover provider tag", () => {
+    expect(validateEligibility({ mode: "domain" })).toBeNull()
+    expect(validateEligibility({ provider: "email", mode: "any" })).toBeNull()
+    expect(validateEligibility({ mode: "github" })).toMatch(/mode/)
+    expect(validateEligibility(null)).toMatch(/object/)
   })
 })

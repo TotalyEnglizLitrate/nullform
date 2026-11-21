@@ -1,4 +1,5 @@
-import type { AuthProvider, Eligibility } from "./types.js"
+import type { User } from "@supabase/supabase-js"
+import type { Eligibility, Subject } from "./types.js"
 
 export function normalizeEmail(email: string, stripPlusTag = false): string {
   const e = email.trim().toLowerCase()
@@ -8,18 +9,15 @@ export function normalizeEmail(email: string, stripPlusTag = false): string {
   return `${local}${e.slice(at)}`
 }
 
-export const emailProvider: AuthProvider = {
-  id: "email",
-  methods: ["otp", "magiclink"],
-  identify(user, policy) {
+export const emailProvider = {
+  identify(user: User, policy: Eligibility): Subject | null {
     // Following the emailed sign-in link proves control of the inbox; refuse unconfirmed addresses regardless.
     if (!user.email || !user.email_confirmed_at) return null
-    const strip = policy.provider === "email" && policy.stripPlusTag === true
+    const strip = policy.stripPlusTag === true
     const normalized = normalizeEmail(user.email, strip)
     return { subject: `email:${normalized}`, handle: normalized }
   },
-  isEligible(who, policy, allowlist) {
-    if (policy.provider !== "email") return false
+  isEligible(who: Subject, policy: Eligibility, allowlist: string[]): boolean {
     if (policy.mode === "any") return true
     if (policy.mode === "domain") {
       const domain = who.handle.slice(who.handle.lastIndexOf("@") + 1)
@@ -27,9 +25,5 @@ export const emailProvider: AuthProvider = {
     }
     const strip = policy.stripPlusTag === true
     return allowlist.some((entry) => normalizeEmail(entry, strip) === who.handle)
-  },
-  validatePolicy(p) {
-    if (!["allowlist", "domain", "any"].includes(p.mode as string)) return "email mode must be allowlist, domain or any"
-    return null
   },
 }

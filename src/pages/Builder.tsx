@@ -53,7 +53,6 @@ export function Builder({ formId }: { formId?: string }) {
   const session = useSession()
   const [title, setTitle] = useState("")
   const [qs, setQs] = useState<EQ[]>([blank()])
-  const [provider, setProvider] = useState<"email" | "github">("email")
   const [mode, setMode] = useState("allowlist")
   const [stripPlus, setStripPlus] = useState(false)
   const [allowlist, setAllowlist] = useState("")
@@ -69,8 +68,8 @@ export function Builder({ formId }: { formId?: string }) {
       const f = data as Form | null
       if (!f || f.status !== "draft") return go("/dashboard")
       setTitle(f.title); setQs(f.schema.questions.map(toEditor))
-      setProvider(f.eligibility.provider); setMode(f.eligibility.mode)
-      setStripPlus(f.eligibility.provider === "email" && !!f.eligibility.stripPlusTag)
+      setMode(f.eligibility.mode)
+      setStripPlus(!!f.eligibility.stripPlusTag)
       setMinGroup(String(f.min_group_size))
       setOpensAt(f.opens_at ? new Date(f.opens_at).toISOString().slice(0, 16) : "")
       const al = await supabase.from("form_allowlist").select("entry").eq("form_id", formId)
@@ -82,7 +81,6 @@ export function Builder({ formId }: { formId?: string }) {
   if (!session) return <><h1>New form</h1><p>Sign in to create forms.</p><SignIn /></>
 
   const update = (i: number, patch: Partial<EQ>) => setQs((a) => a.map((q, j) => (j === i ? { ...q, ...patch } : q)))
-  const setProv = (p: "email" | "github") => { setProvider(p); setMode("allowlist") }
 
   async function save() {
     const schema = stripUndefined({ questions: qs.map(toQuestion) })
@@ -96,7 +94,7 @@ export function Builder({ formId }: { formId?: string }) {
     const row = {
       title: title.trim(), schema, min_group_size: Number(minGroup) || 20,
       opens_at: opensAt ? new Date(opensAt).toISOString() : null,
-      eligibility: provider === "email" ? { provider, mode, stripPlusTag: stripPlus } : { provider, mode },
+      eligibility: { mode, stripPlusTag: stripPlus },
     }
     let id = formId
     const res = id
@@ -173,23 +171,19 @@ export function Builder({ formId }: { formId?: string }) {
       <button type="button" disabled={qs.length >= 50} onClick={() => setQs((a) => [...a, blank()])}>Add question</button>
 
       <h2>Who can register</h2>
-      <p className="muted">One sign-in method per form, so nobody can register twice through two methods.</p>
-      <label htmlFor="prov">Sign-in method</label>
-      <select id="prov" value={provider} onChange={(e) => setProv(e.target.value as "email" | "github")}>
-        <option value="email">Email</option><option value="github">GitHub</option>
-      </select>
+      <p className="muted">People can sign in with email or GitHub. Eligibility is checked against their verified email address.</p>
       <label htmlFor="mode">Eligibility</label>
       <select id="mode" value={mode} onChange={(e) => setMode(e.target.value)}>
-        <option value="allowlist">{provider === "email" ? "Specific email addresses" : "Specific GitHub usernames"}</option>
-        {provider === "email" && <option value="domain">Anyone at an email domain</option>}
+        <option value="allowlist">Specific email addresses</option>
+        <option value="domain">Anyone at an email domain</option>
         <option value="any">Anyone with a verified account</option>
       </select>
       {mode === "any" && <p className="error">With "anyone", one person can register many times with throwaway accounts. Use an allowlist for anything that matters.</p>}
       {mode !== "any" && <>
-        <label htmlFor="al">{mode === "domain" ? "Domains (one per line)" : provider === "email" ? "Email addresses (one per line)" : "GitHub usernames (one per line)"}</label>
+        <label htmlFor="al">{mode === "domain" ? "Domains (one per line)" : "Email addresses (one per line)"}</label>
         <textarea id="al" value={allowlist} onChange={(e) => setAllowlist(e.target.value)} />
       </>}
-      {provider === "email" && mode === "allowlist" &&
+      {mode === "allowlist" &&
         <label className="inline"><input type="checkbox" checked={stripPlus} onChange={(e) => setStripPlus(e.target.checked)} /> Treat name+tag@… as name@…</label>}
 
       <h2>Timing and size</h2>

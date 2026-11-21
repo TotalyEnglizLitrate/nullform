@@ -199,7 +199,7 @@ describe("registration eligibility", () => {
     const a = await signUp(`dup${stamp}+one@test.local`)
     const b = await signUp(`dup${stamp}+two@test.local`)
     const formId = await openForm({
-      eligibility: { provider: "email", mode: "allowlist", stripPlusTag: true },
+      eligibility: { mode: "allowlist", stripPlusTag: true },
       allowlist: [`dup${stamp}@test.local`],
     })
     expect((await call(register, { formId, commitment: commit() }, a.token)).status).toBe(200)
@@ -207,24 +207,19 @@ describe("registration eligibility", () => {
   })
 
   it("matches by domain, exactly", async () => {
-    const formId = await openForm({ eligibility: { provider: "email", mode: "domain" }, allowlist: ["test.local"] })
+    const formId = await openForm({ eligibility: { mode: "domain" }, allowlist: ["test.local"] })
     expect((await call(register, { formId, commitment: commit() }, outsider.token)).status).toBe(200)
-    const other = await openForm({ eligibility: { provider: "email", mode: "domain" }, allowlist: ["example.com"] })
+    const other = await openForm({ eligibility: { mode: "domain" }, allowlist: ["example.com"] })
     expect((await call(register, { formId: other, commitment: commit() }, (await signUp()).token)).status).toBe(403)
   })
 
   it("accepts any verified address in 'any' mode", async () => {
-    const formId = await openForm({ eligibility: { provider: "email", mode: "any" } })
+    const formId = await openForm({ eligibility: { mode: "any" } })
     expect((await call(register, { formId, commitment: commit() }, (await signUp()).token)).status).toBe(200)
   })
 
-  it("refuses the wrong provider (one provider per form)", async () => {
-    const formId = await openForm({ eligibility: { provider: "github", mode: "any" } })
-    expect(await call(register, { formId, commitment: commit() }, outsider.token)).toMatchObject({ status: 403, body: { error: "wrong_provider" } })
-  })
-
   it("validates input and auth", async () => {
-    const formId = await openForm({ eligibility: { provider: "email", mode: "any" } })
+    const formId = await openForm({ eligibility: { mode: "any" } })
     expect(await call(register, { formId, commitment: "1" })).toMatchObject({ status: 401 })
     expect(await call(register, { formId, commitment: "abc" }, outsider.token)).toMatchObject({ status: 400 })
     expect(await call(register, { formId: "nope", commitment: commit() }, outsider.token)).toMatchObject({ status: 400 })
@@ -232,7 +227,7 @@ describe("registration eligibility", () => {
   })
 
   it("stores no link between a user and a commitment", async () => {
-    const formId = await openForm({ eligibility: { provider: "email", mode: "any" } })
+    const formId = await openForm({ eligibility: { mode: "any" } })
     await call(register, { formId, commitment: commit() }, outsider.token)
     const cols = await admin().from("commitments").select("*").eq("form_id", formId).limit(1)
     expect(Object.keys(cols.data![0]!).sort()).toEqual(["commitment", "form_id"])

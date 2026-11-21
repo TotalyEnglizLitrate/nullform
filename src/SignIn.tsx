@@ -4,7 +4,7 @@ import { authRedirectUrl, rememberReturn } from "./lib/return.js"
 import { supabase } from "./lib/supabase.js"
 
 /** Email sign-in link (works anywhere) and GitHub SSO. */
-export function SignIn({ only }: { only?: "email" | "github" }) {
+export function SignIn() {
   const [email, setEmail] = useState("")
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -41,7 +41,7 @@ export function SignIn({ only }: { only?: "email" | "github" }) {
 
   return (
     <div className="card">
-      {only !== "github" && (sent ? (
+      {sent ? (
         <div role="status">
           <p><strong>Check your email.</strong> We sent a sign-in link to {email}.</p>
           <p className="muted">
@@ -59,9 +59,9 @@ export function SignIn({ only }: { only?: "email" | "github" }) {
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <p><button className="primary" disabled={busy || redirecting} aria-busy={sending}><Busy busy={sending} idle="Email me a sign-in link" doing="Sending" /></button></p>
         </form>
-      ))}
-      {!only && !sent && <p className="muted">or</p>}
-      {only !== "email" && !sent && (
+      )}
+      {!sent && <p className="muted">or</p>}
+      {!sent && (
         <button disabled={busy || redirecting} aria-busy={redirecting} onClick={github}>
           <Busy busy={redirecting} idle="Continue with GitHub" doing="Redirecting to GitHub" />
         </button>

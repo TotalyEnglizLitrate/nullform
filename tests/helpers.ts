@@ -73,7 +73,7 @@ export async function createForm(
       owner_id: owner.id,
       title: "Test form",
       schema: testSchema,
-      eligibility: o.eligibility ?? { provider: "email", mode: "allowlist" },
+      eligibility: o.eligibility ?? { mode: "allowlist" },
       opens_at: (o.opensAt ?? new Date(Date.now() - 60_000)).toISOString(),
       ...(o.minGroupSize ? { min_group_size: o.minGroupSize } : {}),
     })

@@ -89,7 +89,7 @@ directly under the same policies. The schema and policies are in `supabase/migra
 ```
 src/        React app: pages, identity derivation, proving and verification workers, audit and results logic
 api/        Vercel function entry points (thin wrappers)
-server/     Handlers: register, submit, lifecycle (open, freeze, anchor, close), auth providers, anchoring
+server/     Handlers: register, submit, lifecycle (open, freeze, anchor, close), eligibility, anchoring
 shared/     Code used by both sides: canonical JSON, hashing, form schema, anchor calldata format
 supabase/   Migrations and local configuration
 tests/      Unit and integration tests

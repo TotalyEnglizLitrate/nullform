@@ -9,8 +9,6 @@ import { supabase } from "../lib/supabase.js"
 import type { Form } from "../lib/types.js"
 import { Backup } from "./Backup.js"
 
-const METHOD = { email: "email", github: "GitHub" } as const
-
 export function Register({ form }: { form: Form }) {
   const session = useSession()
   const [registered, setRegistered] = useState<boolean | null>(null)
@@ -45,11 +43,11 @@ export function Register({ form }: { form: Form }) {
     <>
       <h2>Register</h2>
       <p>
-        Registration is open. Sign in with {METHOD[form.eligibility.provider]} to join the group. Your account is
+        Registration is open. Sign in, with email or GitHub, to join the group. The form checks your verified email address. Your account is
         only used to check eligibility; the identity you answer with is created in your browser and is not linked
         to your account on our servers.
       </p>
-      {session === undefined ? null : !session ? <SignIn only={form.eligibility.provider} /> : registered ? (
+      {session === undefined ? null : !session ? <SignIn /> : registered ? (
         <p className="ok" role="status">
           You're registered. Come back when the owner has frozen the group and submissions open, using this same browser.
         </p>

@@ -20,8 +20,7 @@ export async function post<T = Record<string, unknown>>(path: string, body: unkn
 const MESSAGES: Record<string, string> = {
   unauthenticated: "Please sign in first.",
   not_eligible: "This account isn't eligible for this form.",
-  wrong_provider: "This form needs a different sign-in method.",
-  unverified_identity: "Your account's identity couldn't be verified.",
+  unverified_identity: "Your account's email address couldn't be verified.",
   already_registered: "You're already registered for this form.",
   commitment_taken: "That identity is already in the group.",
   registration_closed: "Registration for this form is closed.",

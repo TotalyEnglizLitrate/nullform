@@ -18,7 +18,7 @@ export function About() {
       <ol>
         <li>
           <strong>Register (not anonymous).</strong> The form's owner says who is eligible: specific email
-          addresses, an email domain, or GitHub users. Eligible people sign in and register. This step needs
+          addresses or an email domain, whether they sign in with email or GitHub. Eligible people sign in and register. This step needs
           your account, because eligibility has to be checked.
         </li>
         <li>
