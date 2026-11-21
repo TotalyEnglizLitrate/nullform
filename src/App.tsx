@@ -1,4 +1,5 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { Busy } from "./Busy.js"
 import { supabase } from "./lib/supabase.js"
 import { Moon, Sun } from "./Icons.js"
 import { useAuthNotice } from "./lib/authNotice.js"
@@ -19,7 +20,15 @@ export function App() {
   const session = useSession()
   const [notice, dismissNotice] = useAuthNotice()
   const [theme, toggleTheme] = useTheme()
+  const [signingOut, setSigningOut] = useState(false)
   const [, section, id] = route.split("/")
+
+  useEffect(() => { if (!session) setSigningOut(false) }, [session])
+  async function signOut() {
+    setSigningOut(true)
+    const { error } = await supabase.auth.signOut()   // revokes the session on the server, which takes a moment
+    if (error) setSigningOut(false)
+  }
 
   // Back from an email link or GitHub: return to the page the person was on.
   useEffect(() => {
@@ -35,7 +44,11 @@ export function App() {
         <a href={href("/dashboard")}>My forms</a>
         <span className="grow" />
         {session && <span className="email" title={session.user.email}>{session.user.email}</span>}
-        {session && <button onClick={() => supabase.auth.signOut()}>Sign out</button>}
+        {session && (
+          <button onClick={signOut} disabled={signingOut} aria-busy={signingOut}>
+            <Busy busy={signingOut} idle="Sign out" doing="Signing out" />
+          </button>
+        )}
         <button
           className="icon-button"
           onClick={toggleTheme}
