@@ -20,13 +20,20 @@ project before adding previews.
 ### 1. Supabase (hosted)
 1. Create a project. Pick a region close to the Vercel functions (this project uses Mumbai, `ap-south-1`,
    with Vercel's `bom1` set in `vercel.json`; the region can't be changed after creation).
-2. Auth, URL configuration: set **Site URL** to the production URL, and add it to the redirect list.
-3. Auth, Providers: enable **Email** (OTP, 6 digits) and **GitHub** (create an OAuth app on GitHub
-   whose callback is `https://<project-ref>.supabase.co/auth/v1/callback`).
-4. Auth, Email templates: set the "Magic Link" and "Confirm signup" bodies to the one in
-   `supabase/templates/otp.html` so the email carries `{{ .Token }}`.
-5. Auth, SMTP: configure a real SMTP provider. The built-in mailer is heavily rate-limited, so
-   check current limits before a public demo.
+2. Auth, URL configuration: set **Site URL** to the production URL, and add the same URL to the
+   **Redirect URLs** allow-list. Email sign-in links and GitHub sign-in both return the browser there;
+   a URL that isn't on the list is refused.
+3. Auth, Providers: enable **Email** and **GitHub** (create an OAuth app on GitHub whose callback is
+   `https://<project-ref>.supabase.co/auth/v1/callback`).
+4. Email sign-in uses Supabase's default **Magic Link** email, so no template editing is needed (the
+   free tier doesn't allow it). The app tells people to open the link in the same browser they asked
+   from: with PKCE a link only completes there, and only once. If someone opens it elsewhere, the app
+   says why and asks them to request a new one.
+5. Auth, SMTP: configure a real SMTP provider. As far as I know the built-in mailer only delivers to
+   your own team's addresses and is heavily rate-limited, so public email sign-in needs your own SMTP
+   server (Brevo, Resend and others have free tiers). Check current limits before a public demo.
+   Mail systems that open links automatically (some corporate scanners) use up one-time links before
+   the person clicks; that is the known cost of login links, and GitHub sign-in avoids it.
 6. Note the project ref, the DB password, and the API keys (publishable and secret).
 
 ### 2. Vercel
