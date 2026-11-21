@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { canonicalize } from "../shared/canonical.js"
 import { scopeFromFormId, schemaHash, signalFromPayload } from "../shared/hash.js"
-import { isCommitment, sortLeaves } from "../shared/leaves.js"
+import { FIELD, isCanonicalDecimal, isCommitment, isFieldElement, sortLeaves } from "../shared/leaves.js"
 import { validatePayload, validateSchema, type FormSchema } from "../shared/schema.js"
 import { normalizeEmail, emailProvider } from "../server/providers/email.js"
 import { githubProvider } from "../server/providers/github.js"
@@ -45,6 +45,18 @@ describe("leaves", () => {
     expect(isCommitment("1.5")).toBe(false)
     expect(isCommitment("21888242871839275222246405745257275088548364400416034343698204186575808495617")).toBe(false)
     expect(isCommitment(5)).toBe(false)
+    expect(isCommitment("01")).toBe(false) // a respelling of 1
+  })
+  it("accepts only the canonical spelling of a number", () => {
+    for (const ok of ["0", "7", "123456789", FIELD.toString().replace(/.$/, "0")]) expect(isCanonicalDecimal(ok), ok).toBe(true)
+    for (const bad of ["", "07", "00", "-1", "+1", "1.0", " 1", "1 ", "1e3", "0x1", "١٢٣", "1".repeat(79), 7, null, undefined]) expect(isCanonicalDecimal(bad), String(bad)).toBe(false)
+  })
+  it("field elements are canonical and below the field order", () => {
+    expect(isFieldElement("0")).toBe(true)
+    expect(isFieldElement((FIELD - 1n).toString())).toBe(true)
+    expect(isFieldElement(FIELD.toString())).toBe(false)
+    expect(isFieldElement((FIELD + 5n).toString())).toBe(false)
+    expect(isFieldElement("0" + (FIELD - 1n).toString())).toBe(false)
   })
 })
 

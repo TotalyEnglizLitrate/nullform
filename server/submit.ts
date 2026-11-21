@@ -3,9 +3,8 @@ import { db } from "./db.js"
 import { loadForm } from "./forms.js"
 import { HttpError, handler, json, readJson, sqlError } from "./http.js"
 import { scopeFromFormId, signalFromPayload } from "../shared/hash.js"
+import { isCanonicalDecimal, isFieldElement } from "../shared/leaves.js"
 import { validatePayload } from "../shared/schema.js"
-
-const NUM = /^[0-9]{1,78}$/
 
 /** POST { formId, payload, proof }. No authentication: the proof is the credential. */
 export const submit = handler(async (req) => {
@@ -14,15 +13,18 @@ export const submit = handler(async (req) => {
   if (form.status !== "frozen" || !form.root) throw new HttpError(403, "submissions_closed")
 
   const proof = body.proof as Record<string, unknown> | undefined
+  // Every number must be in its one canonical spelling. The verifier reads "07" and "7" as the same number, so a
+  // nullifier written with a leading zero would verify yet count as a different value in the database, and
+  // a member could answer twice. The nullifier and root must also be real field elements.
   if (
     !proof || typeof proof !== "object" ||
     typeof proof.merkleTreeDepth !== "number" ||
-    typeof proof.merkleTreeRoot !== "string" || !NUM.test(proof.merkleTreeRoot) ||
-    typeof proof.nullifier !== "string" || !NUM.test(proof.nullifier) ||
-    typeof proof.message !== "string" || !NUM.test(proof.message) ||
-    typeof proof.scope !== "string" || !NUM.test(proof.scope) ||
+    !isFieldElement(proof.merkleTreeRoot) ||
+    !isFieldElement(proof.nullifier) ||
+    !isCanonicalDecimal(proof.message) ||
+    !isCanonicalDecimal(proof.scope) ||
     !Array.isArray(proof.points) || proof.points.length !== 8 ||
-    !proof.points.every((p) => typeof p === "string" && NUM.test(p))
+    !proof.points.every((p) => isCanonicalDecimal(p))
   ) throw new HttpError(400, "invalid_proof")
 
   const invalid = validatePayload(form.schema, body.payload)
