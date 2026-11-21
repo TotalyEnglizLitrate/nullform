@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Only the homepage is listed: the app's other pages live under /#/..., and search engines ignore
+     everything after the # (so they could never be indexed as separate pages). -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://nullform.engliz.dev/</loc>
+  </url>
+</urlset>

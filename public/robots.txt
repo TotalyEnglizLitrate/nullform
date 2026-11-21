@@ -1,0 +1,6 @@
+# Everything a visitor can see is fine to crawl. The API and the 4 MB circuit files are not content.
+User-agent: *
+Disallow: /api/
+Disallow: /artifacts/
+
+Sitemap: https://nullform.engliz.dev/sitemap.xml
