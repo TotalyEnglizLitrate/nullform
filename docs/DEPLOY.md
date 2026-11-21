@@ -89,8 +89,10 @@ still works; the form just has no on-chain timestamp, and the owner can press "A
 ## Checking a deployment
 1. Create a form, register with a second account, freeze, submit, open the audit page.
 2. On the audit page, run "Verify in your browser" for the group, the anchor and the receipts.
-3. Run `node scripts/export-anchors.mjs` (see the script header) and publish `anchors.json`
-   to a public repository as an independent mirror of the anchored roots.
+3. The list of anchored groups is public: anyone can download `anchors.json` from the app's **Anchors** page
+   (`/#/anchors`), straight from the database and with no sign-in. `node scripts/export-anchors.mjs` writes the
+   identical file from the command line (a test checks they match byte for byte). Keep a copy somewhere
+   independent if you want an offline record of which transaction belongs to which form.
 
 ## Rolling back
 Vercel keeps every deployment: promote an earlier one from the dashboard. Migrations are

@@ -35,6 +35,8 @@ sequenceDiagram
 
 Anyone can open a form's **audit page** to re-check the group, the on-chain anchor and every receipt in their own
 browser. Answers are never shown there; only the form's owner can read them.
+The list of every anchored group is public too: the **Anchors** page (`/#/anchors`) lets anyone download it as
+`anchors.json`, read straight from the database with no sign-in.
 
 ### Design choices worth knowing
 
@@ -91,7 +93,7 @@ server/     Handlers: register, submit, lifecycle (open, freeze, anchor, close),
 shared/     Code used by both sides: canonical JSON, hashing, form schema, anchor calldata format
 supabase/   Migrations and local configuration
 tests/      Unit and integration tests
-scripts/    export-anchors.mjs, which writes the public anchors.json mirror
+scripts/    export-anchors.mjs, the command-line twin of the Anchors page's anchors.json download
 public/     Self-hosted circuit files, icons and the theme script
 docs/       Deployment guide
 ```
