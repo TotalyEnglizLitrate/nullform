@@ -29,5 +29,10 @@
   },
   "engines": {
     "node": "24.x"
+  },
+  "overrides": {
+    "ws": "^8.23.0",
+    "underscore": "^1.13.8",
+    "snarkjs": "0.7.5"
   }
 }
