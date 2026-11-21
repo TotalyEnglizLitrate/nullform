@@ -1,12 +1,19 @@
 :root {
-  --bg: #fbfbfa; --fg: #1a1a19; --muted: #6b6b68; --line: #dcdcd7; --accent: #2b59c3; --accent-fg: #fff;
-  --danger: #b3261e; --ok: #1e7a3c; --panel: #f2f2ef;
+  /* light-dark(light, dark): one definition per colour. Follows the system unless data-theme is set. */
+  color-scheme: light dark;
+  --bg: light-dark(#fbfbfa, #141413);
+  --fg: light-dark(#1a1a19, #ececea);
+  --muted: light-dark(#6b6b68, #9a9a95);
+  --line: light-dark(#dcdcd7, #2e2e2b);
+  --accent: light-dark(#2b59c3, #7aa2ff);
+  --accent-fg: light-dark(#fff, #0b1020);
+  --danger: light-dark(#b3261e, #ff8a80);
+  --ok: light-dark(#1e7a3c, #7bd88f);
+  --panel: light-dark(#f2f2ef, #1c1c1a);
   font: 16px/1.5 system-ui, sans-serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #141413; --fg: #ececea; --muted: #9a9a95; --line: #2e2e2b; --accent: #7aa2ff; --accent-fg: #0b1020;
-    --danger: #ff8a80; --ok: #7bd88f; --panel: #1c1c1a; }
-}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); }
 main, header { max-width: 44rem; margin: 0 auto; padding: 0 1rem; }

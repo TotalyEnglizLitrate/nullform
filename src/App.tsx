@@ -4,6 +4,7 @@ import { useAuthNotice } from "./lib/authNotice.js"
 import { consumeReturn } from "./lib/return.js"
 import { href, useRoute } from "./lib/router.js"
 import { useSession } from "./lib/session.js"
+import { useTheme } from "./lib/theme.js"
 import { Audit } from "./pages/Audit.js"
 import { Builder } from "./pages/Builder.js"
 import { Dashboard } from "./pages/Dashboard.js"
@@ -15,6 +16,7 @@ export function App() {
   const route = useRoute()
   const session = useSession()
   const [notice, dismissNotice] = useAuthNotice()
+  const [theme, toggleTheme] = useTheme()
   const [, section, id] = route.split("/")
 
   // Back from an email link or GitHub: return to the page the person was on.
@@ -30,6 +32,9 @@ export function App() {
         <a className="brand" href={href("/")}>Nullform</a>
         <a href={href("/dashboard")}>My forms</a>
         <span className="grow" />
+        <button onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
+          {theme === "dark" ? "Light" : "Dark"}
+        </button>
         {session && (
           <>
             <span className="muted">{session.user.email}</span>
