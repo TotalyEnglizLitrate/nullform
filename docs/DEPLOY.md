@@ -94,6 +94,20 @@ still works; the form just has no on-chain timestamp, and the owner can press "A
    identical file from the command line (a test checks they match byte for byte). Keep a copy somewhere
    independent if you want an offline record of which transaction belongs to which form.
 
+## Search engines
+
+`public/robots.txt` lets crawlers in and keeps them out of `/api/` and the 4 MB circuit files; `public/sitemap.xml`
+lists the homepage. The page head carries a title, description, canonical URL and structured data, and the raw HTML
+has a text fallback for crawlers that don't run scripts. A Lighthouse SEO audit of the build scores 100.
+
+**Only the homepage can be indexed.** The app's other pages live under `/#/...`, and search engines ignore everything
+after the `#`, so they are not separate pages to a crawler (which also keeps forms, audits and results out of search
+results). Giving the overview its own indexable URL would mean switching to path-based routing: real URLs, a rewrite
+rule for the single-page app, and `noindex` on the private pages.
+
+To get listed faster, add the site in Google Search Console (verify with a DNS TXT record on the domain) and submit
+`https://nullform.engliz.dev/sitemap.xml`. That step needs your account, so it isn't automated.
+
 ## Rolling back
 Vercel keeps every deployment: promote an earlier one from the dashboard. Migrations are
 forward-only, so write schema changes to be compatible with the previous release.
