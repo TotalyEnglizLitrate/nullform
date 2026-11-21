@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Busy } from "./Busy.js"
 import { supabase } from "./lib/supabase.js"
 import { Moon, Sun } from "./Icons.js"
+import { LICENSE_URL, REPO_URL } from "./site.js"
 import { useAuthNotice } from "./lib/authNotice.js"
 import { consumeReturn } from "./lib/return.js"
 import { href, useRoute } from "./lib/router.js"
@@ -73,6 +74,13 @@ export function App() {
           : section === "f" && id ? <FormPage formId={id} />
           : <Home />}
       </main>
+      <footer>
+        <span>
+          NullForm is open source under the{" "}
+          <a href={LICENSE_URL} target="_blank" rel="noreferrer noopener">MIT license</a>.
+        </span>
+        <a href={REPO_URL} target="_blank" rel="noreferrer noopener">Source on GitHub</a>
+      </footer>
     </div>
   )
 }
