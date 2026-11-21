@@ -29,7 +29,7 @@ export function App() {
   }, [session])
 
   return (
-    <>
+    <div className="frame">
       <header>
         <a className="brand" href={href("/")}>NullForm</a>
         <a href={href("/dashboard")}>My forms</a>
@@ -58,6 +58,6 @@ export function App() {
           : section === "f" && id ? <FormPage formId={id} />
           : <Home />}
       </main>
-    </>
+    </div>
   )
 }
