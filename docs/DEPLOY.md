@@ -1,4 +1,4 @@
-# Deploying Nullform
+# Deploying NullForm
 
 Hosting: **Vercel** serves the SPA and the three Node functions in `api/`. **Supabase** provides
 Postgres and Auth. **GitHub Actions** (`.github/workflows/ci.yml`) tests every push to `main`,

@@ -67,7 +67,7 @@ export function checkAnchor(
   const checks: Check[] = [
     { name: "Transaction found on the chain", ok: true },
     { name: "Transaction is confirmed in a block", ok: tx.blockNumber !== null, detail: tx.blockNumber ? undefined : "still pending" },
-    { name: "Calldata is a Nullform anchor", ok: data !== null },
+    { name: "Calldata is a NullForm anchor", ok: data !== null },
     { name: "Anchor is for this form", ok: data?.formId === form.id },
     { name: "Anchored root equals the published root", ok: data !== null && data.root === form.root, detail: data?.root },
     { name: "Sent from the wallet to itself", ok: tx.to !== null && tx.to.toLowerCase() === tx.from.toLowerCase() },

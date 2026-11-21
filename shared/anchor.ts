@@ -14,7 +14,7 @@ export function encodeAnchorData(formId: string, root: string): `0x${string}` {
   return `0x${MAGIC}${formId.replace(/-/g, "").toLowerCase()}${BigInt(root).toString(16).padStart(64, "0")}`
 }
 
-/** Returns null for anything that isn't a well-formed Nullform anchor. */
+/** Returns null for anything that isn't a well-formed NullForm anchor. */
 export function decodeAnchorData(input: string): { formId: string; root: string } | null {
   const m = /^0x([0-9a-f]{16})([0-9a-f]{32})([0-9a-f]{64})$/i.exec(input)
   if (!m || m[1]!.toLowerCase() !== MAGIC) return null

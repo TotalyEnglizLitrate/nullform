@@ -17,7 +17,7 @@ export function Home() {
         <li>Members answer anonymously. Each member can answer once.</li>
       </ol>
       <p className="muted">
-        Nullform protects who answered, not what was answered: the owner reads every answer.
+        NullForm protects who answered, not what was answered: the owner reads every answer.
       </p>
       <p><a href={href("/new")}>Create a form</a> · <a href={href("/dashboard")}>My forms</a></p>
     </>

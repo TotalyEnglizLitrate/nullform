@@ -195,11 +195,11 @@ password_requirements = ""
 # rp_origins = ["http://127.0.0.1:3000"]
 
 [auth.email.template.magic_link]
-subject = "Sign in to Nullform"
+subject = "Sign in to NullForm"
 content_path = "./supabase/templates/signin.html"
 
 [auth.email.template.confirmation]
-subject = "Sign in to Nullform"
+subject = "Sign in to NullForm"
 content_path = "./supabase/templates/signin.html"
 
 [auth.external.github]

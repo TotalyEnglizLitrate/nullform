@@ -66,7 +66,7 @@ describe("anchor checks", () => {
   it("fails for a missing, pending, foreign or altered transaction", () => {
     expect(failing(null)).toEqual(["Transaction found on the chain"])
     expect(failing(tx({ blockNumber: null }))).toEqual(["Transaction is confirmed in a block"])
-    expect(failing(tx({ input: "0xdeadbeef" }))).toContain("Calldata is a Nullform anchor")
+    expect(failing(tx({ input: "0xdeadbeef" }))).toContain("Calldata is a NullForm anchor")
     expect(failing(tx({ input: encodeAnchorData("44444444-4444-4444-8444-444444444444", root) }))).toEqual(["Anchor is for this form"])
     expect(failing(tx({ input: encodeAnchorData(FORM, "1") }))).toEqual(["Anchored root equals the published root"])
     expect(failing(tx({ to: "0x0000000000000000000000000000000000000002" }))).toEqual(["Sent from the wallet to itself"])

@@ -4,9 +4,9 @@ import { href } from "../lib/router.js"
 export function About() {
   return (
     <>
-      <h1>How Nullform works</h1>
+      <h1>How NullForm works</h1>
       <p>
-        Nullform lets a group answer a form anonymously, while making sure that only eligible people can
+        NullForm lets a group answer a form anonymously, while making sure that only eligible people can
         answer, and only once.
       </p>
       <p>
@@ -60,10 +60,10 @@ export function About() {
         <li>The owner can't secretly change the group once it is frozen.</li>
       </ul>
 
-      <h2>What Nullform does not protect</h2>
+      <h2>What NullForm does not protect</h2>
       <ul>
         <li>
-          <strong>What you write.</strong> Nullform protects <em>who</em> answered, not <em>what</em> was answered.
+          <strong>What you write.</strong> NullForm protects <em>who</em> answered, not <em>what</em> was answered.
           The owner reads every answer, and free text can identify you by style or detail.
         </li>
         <li>

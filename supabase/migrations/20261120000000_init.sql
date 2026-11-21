@@ -1,4 +1,4 @@
--- Nullform schema.
+-- NullForm schema.
 -- Anonymity rule: `registrations` (who) and `commitments` (what is in the tree) share no
 -- column, have no foreign key between them, and `commitments` has no timestamp.
 -- Lifecycle: draft -> registration -> frozen -> closed.

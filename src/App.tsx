@@ -31,7 +31,7 @@ export function App() {
   return (
     <>
       <header>
-        <a className="brand" href={href("/")}>Nullform</a>
+        <a className="brand" href={href("/")}>NullForm</a>
         <a href={href("/dashboard")}>My forms</a>
         <span className="grow" />
         {session && <span className="email" title={session.user.email}>{session.user.email}</span>}

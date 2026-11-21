@@ -20,7 +20,7 @@ describe("anchor calldata", () => {
     expect(() => encodeAnchorData(FORM, "x")).toThrow()
     expect(() => encodeAnchorData(FORM, (2n ** 256n).toString())).toThrow()
   })
-  it("ignores anything that isn't a Nullform anchor", () => {
+  it("ignores anything that isn't a NullForm anchor", () => {
     const good = encodeAnchorData(FORM, ROOT)
     expect(decodeAnchorData("0x")).toBeNull()
     expect(decodeAnchorData(good.slice(0, -2))).toBeNull()
