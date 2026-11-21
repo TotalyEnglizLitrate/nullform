@@ -134,20 +134,31 @@ npm test             # unit tests, plus integration tests against the local Supa
 ```
 
 The integration tests sign in for real, through the mail catcher, and generate real proofs. The chain tests run only if
-a local chain is listening on port 8545 and are skipped otherwise. A browser end-to-end flow (register, freeze, submit,
-audit) was run by hand against a production build; it is not yet part of CI.
+a local chain is listening on port 8545 and are skipped otherwise.
+
+The browser flows (register, freeze, submit, audit, results, plus layout, theme and sign-in checks) and a production
+smoke test (the live site, the hosted database and a real Sepolia anchor, with its own cleanup) were run as scripts by
+hand. They are not part of CI yet.
 
 ## Measured
 
-One desktop machine and headless Chromium, so treat these as ballpark. Phones have not been measured.
+Timings come from one desktop machine, headless Chromium and a roughly 0.5 MB/s connection to the live site, so treat
+them as ballpark. Phones have not been measured.
 
 | | |
 |---|---|
-| Generate a proof in the browser (Web Worker) | about 0.4 s warm, 0.7 s cold |
+| Generate a proof in the browser (Web Worker), once the circuit files are cached | about 0.4 s warm, 0.7 s cold |
+| Download the circuit files (4.2 MB: a 1.8 MB `.wasm` and a 2.4 MB `.zkey`, compressed, from the edge cache) | about 8 to 9 s on that slow link, once. The browser keeps them for a day |
+| Submit to receipt, fresh browser, before prefetching | 7 to 10 s, nearly all of it the download above |
+| The same with the 4.2 MB prefetched | in a controlled test with each file delayed 3 s, 6.7 s fell to 1.1 s |
+| Register, live | about 0.7 to 1.2 s |
+| Freeze, live, including sending the Sepolia anchor transaction | about 2 to 3 s |
 | Verify a proof on the server | about 20 to 50 ms |
-| Serverless cold start (stub measured on Vercel's US East region) | about 1.2 to 1.4 s end to end |
+| Serverless cold start (a stub, measured on Vercel's US East region) | about 1.2 to 1.4 s end to end |
 | App bundle | about 0.55 MB (about 175 KB gzipped), plus a 0.45 MB proving worker |
-| Circuit files, loaded on demand | 1.8 MB `.wasm`, 2.4 MB `.zkey` |
+
+The circuit download used to start only when you pressed Submit. The answer page now starts it in the background as
+soon as it finds your browser in the group, so by the time you have filled in the form it is usually cached.
 
 ## Deploying
 
