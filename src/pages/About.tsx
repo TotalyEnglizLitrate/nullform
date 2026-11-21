@@ -67,8 +67,11 @@ export function About() {
           The owner reads every answer, and free text can identify you by style or detail.
         </li>
         <li>
-          <strong>Network traces.</strong> The hosting providers can see IP addresses and request times. Using Tor
-          Browser helps.
+          <strong>Network traces.</strong> The hosting providers can see the IP address and time of every request.
+          The practical way to be identified is to register and answer from the same address, which anyone with access
+          to those logs could match up. Answer from a different network than the one you registered on, or hide your
+          address with Tor Browser (the strongest option), a VPN or a proxy. A VPN or proxy only moves that trust to
+          whoever runs it.
         </li>
         <li>
           <strong>Small groups.</strong> With only a few members, anonymity is weak. Owners are warned below 20.
