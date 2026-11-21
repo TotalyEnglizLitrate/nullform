@@ -30,7 +30,7 @@ sequenceDiagram
   U->>S: Fetch the public fingerprint list
   Note over U: Rebuild the group locally, generate the proof in a Web Worker
   U->>S: Submit answers + proof (no sign-in, no cookies)
-  Note over S: Verify the proof, the root, the scope and the answers' hash; reject repeats
+  Note over S: Verify the proof, the root, the scope and the answers' hash, and reject repeats
 ```
 
 Anyone can open a form's **audit page** to re-check the group, the on-chain anchor and every receipt in their own
