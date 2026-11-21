@@ -57,7 +57,12 @@ Under the `production` environment (Settings, Environments), so you can add requ
 | `SUPABASE_PROJECT_ID` | the project ref |
 | `SUPABASE_DB_PASSWORD` | set when creating the project |
 
-### 4. Fund the anchor wallet
+### 4. Turn deployment on
+The `deploy` job is off by default. Once the secrets above exist, create a **repository variable**
+(Settings, Secrets and variables, Variables) named `DEPLOY_ENABLED` with the value `true`.
+Until then every push still runs the tests; nothing is deployed.
+
+### 5. Fund the anchor wallet
 Send ~0.05 Sepolia ETH to the wallet whose key is `ANCHOR_PRIVATE_KEY`. Without a key, freezing
 still works; the form just has no on-chain timestamp, and the owner can press "Anchor now" later.
 

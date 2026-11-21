@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # `supabase start` reads these placeholders from supabase/config.toml; OAuth isn't exercised in CI.
+      SUPABASE_AUTH_GITHUB_CLIENT_ID: placeholder
+      SUPABASE_AUTH_GITHUB_CLIENT_SECRET: placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.111.0
+      - name: Start local Supabase (Postgres, Auth, REST, mail catcher)
+        run: supabase start -x imgproxy,postgres-meta,studio,logflare,vector,edge-runtime,storage-api,realtime,supavisor
+      - name: Point the tests at the local stack
+        run: |
+          supabase status -o env | grep -E '^(PUBLISHABLE_KEY|SECRET_KEY)=' | sed 's/"//g' \
+            | awk -F= '{print "SUPABASE_"$1"="$2}' >> "$GITHUB_ENV"
+      - name: Start a local EVM chain for the anchor tests
+        run: |
+          docker run -d --name anvil -p 8545:8545 ghcr.io/foundry-rs/foundry:v1.9.0 "anvil --host 0.0.0.0"
+          for _ in $(seq 1 30); do
+            curl -sf -X POST -H 'content-type: application/json' \
+              --data '{"jsonrpc":"2.0","id":1,"method":"eth_chainId","params":[]}' http://127.0.0.1:8545 && break
+            sleep 1
+          done
+
+      - run: npm test
+      - name: Production build
+        run: npm run build
+        env:
+          # The app needs these at build time; any valid-looking values do for a CI build.
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ env.SUPABASE_PUBLISHABLE_KEY }}
+
+  deploy:
+    needs: test
+    # Off until you create the repository variable DEPLOY_ENABLED=true (see docs/DEPLOY.md),
+    # so a push before the secrets exist doesn't fail.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: npm
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.111.0
+
+      # Schema first: new code never runs against an old schema. Migrations are additive and ordered.
+      - name: Apply database migrations
+        run: |
+          supabase link --project-ref "$SUPABASE_PROJECT_ID"
+          supabase db push --yes
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Pull Vercel project settings and environment
+        run: npx --yes vercel@66.6.0 pull --yes --environment=production --token="$VERCEL_TOKEN"
+      - name: Build
+        run: npx --yes vercel@66.6.0 build --prod --token="$VERCEL_TOKEN"
+      - name: Deploy
+        run: npx --yes vercel@66.6.0 deploy --prebuilt --prod --token="$VERCEL_TOKEN"
