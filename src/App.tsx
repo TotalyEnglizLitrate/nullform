@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { supabase } from "./lib/supabase.js"
+import { Moon, Sun } from "./Icons.js"
 import { useAuthNotice } from "./lib/authNotice.js"
 import { consumeReturn } from "./lib/return.js"
 import { href, useRoute } from "./lib/router.js"
@@ -33,15 +34,16 @@ export function App() {
         <a className="brand" href={href("/")}>Nullform</a>
         <a href={href("/dashboard")}>My forms</a>
         <span className="grow" />
-        <button onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>
-          {theme === "dark" ? "Light" : "Dark"}
+        {session && <span className="email" title={session.user.email}>{session.user.email}</span>}
+        {session && <button onClick={() => supabase.auth.signOut()}>Sign out</button>}
+        <button
+          className="icon-button"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
+          {theme === "dark" ? <Sun /> : <Moon />}
         </button>
-        {session && (
-          <>
-            <span className="muted">{session.user.email}</span>
-            <button onClick={() => supabase.auth.signOut()}>Sign out</button>
-          </>
-        )}
       </header>
       <main>
         {notice && !session && (
