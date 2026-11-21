@@ -3,12 +3,13 @@ import { href } from "../lib/router.js"
 export function Home() {
   return (
     <>
-      <h1>Anonymous forms for verified groups</h1>
+      <h1>Authenticated, Anonymous forms</h1>
       <p>
         Only eligible, signed-in people can <strong>register</strong> for a form. Answers are then submitted
         <strong> without signing in</strong>, with a zero-knowledge proof that the sender is one of the registered
         members, and not which one.
       </p>
+      <p><a href={href("/about")}>Tell me more</a></p>
       <ol>
         <li>The owner creates a form and decides who is eligible.</li>
         <li>Eligible people sign in and register. Their browser creates a secret that never leaves it.</li>
