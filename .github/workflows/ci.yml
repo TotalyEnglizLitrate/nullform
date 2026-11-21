@@ -17,6 +17,7 @@ jobs:
       group: ci-${{ github.ref }}
       cancel-in-progress: true
     env:
+      MAILPIT_URL: http://127.0.0.1:54399   # where the integration tests read sign-in emails
       # `supabase start` reads these placeholders from supabase/config.toml; OAuth isn't exercised in CI.
       SUPABASE_AUTH_GITHUB_CLIENT_ID: placeholder
       SUPABASE_AUTH_GITHUB_CLIENT_SECRET: placeholder
@@ -32,8 +33,26 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 2.111.0
+      # The runner image started occupying the mail catcher's default port (54324), which made
+      # `supabase start` fail with "address already in use". Use a port nothing else will, in CI only.
+      - name: Move the mail catcher to a free port
+        run: |
+          sed -i 's/^port = 54324$/port = 54399/' supabase/config.toml
+          grep -n '^port = 54399$' supabase/config.toml
+          echo "Listeners on the 543xx range before starting (diagnostics):"
+          (ss -ltnH | grep -E ':543[0-9]{2}\b' || echo "  none")
       - name: Start local Supabase (Postgres, Auth, REST, mail catcher)
-        run: supabase start -x imgproxy,postgres-meta,studio,logflare,vector,edge-runtime,storage-api,realtime,supavisor
+        # Retries once or twice: starting a dozen containers on a fresh runner can hit transient Docker errors.
+        run: |
+          for attempt in 1 2 3; do
+            if supabase start -x imgproxy,postgres-meta,studio,logflare,vector,edge-runtime,storage-api,realtime,supavisor; then
+              exit 0
+            fi
+            echo "supabase start failed (attempt $attempt of 3); cleaning up and retrying"
+            supabase stop --no-backup || true
+            sleep 5
+          done
+          exit 1
       - name: Point the tests at the local stack
         run: |
           supabase status -o env | grep -E '^(PUBLISHABLE_KEY|SECRET_KEY)=' | sed 's/"//g' \
