@@ -53,9 +53,15 @@ Under the `production` environment (Settings, Environments), so you can add requ
 |---|---|
 | `VERCEL_TOKEN` | Vercel account settings, Tokens |
 | `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` | `.vercel/project.json` after `vercel link` |
-| `SUPABASE_ACCESS_TOKEN` | Supabase account, Access Tokens |
 | `SUPABASE_PROJECT_ID` | the project ref |
 | `SUPABASE_DB_PASSWORD` | set when creating the project |
+
+Migrations connect with the database password only, not a Supabase account token. An account
+token reaches every organization and project you belong to, and has no narrower scope. Also set a
+repository **variable** (not a secret) `SUPABASE_DB_HOST` to the project's session pooler host,
+found in `supabase/.temp/pooler-url` after `supabase link` or in the dashboard under Connect
+(for this project: `aws-1-ap-south-1.pooler.supabase.com`). The pooler is used because GitHub
+runners lack IPv6 and the direct database host is IPv6-only on the free tier.
 
 ### 4. Turn deployment on
 The `deploy` job is off by default. Once the secrets above exist, create a **repository variable**
