@@ -7,14 +7,48 @@
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <title>NullForm</title>
+  <title>NullForm: Authenticated, Anonymous forms</title>
+  <meta name="description" content="Only eligible, signed-in people can register for a form, but answers are submitted anonymously with a zero-knowledge proof. Open source.">
+  <link rel="canonical" href="https://nullform.engliz.dev/">
   <!-- Link previews (Slack, WhatsApp, Discord, iMessage, ...) read this from the raw HTML; they do not run scripts. -->
   <meta property="og:title" content="Authenticated, Anonymous forms">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "NullForm",
+    "url": "https://nullform.engliz.dev/",
+    "description": "Forms where only eligible, signed-in people can register, and answers are submitted anonymously with a zero-knowledge proof that the sender is a registered member.",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires JavaScript and WebAssembly",
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/MIT"
+  }
+  </script>
   <script src="/theme.js"></script>
   <link rel="stylesheet" href="/src/styles.css">
 </head>
 <body>
   <div id="root"></div>
+  <!-- Search engines and link bots that don't run scripts read this; people with JavaScript never see it. -->
+  <noscript>
+    <div class="frame">
+      <main>
+        <h1>Authenticated, Anonymous forms</h1>
+        <p>
+          Only eligible, signed-in people can <strong>register</strong> for a form. Answers are then submitted
+          <strong>without signing in</strong>, with a zero-knowledge proof that the sender is one of the registered
+          members, and not which one. <strong>Only the answers are anonymous; registering is not.</strong>
+        </p>
+        <p>
+          NullForm does its cryptography in your browser, so it needs JavaScript. It is open source under the
+          <a href="https://github.com/TotalyEnglizLitrate/nullform/blob/main/LICENSE">MIT license</a>:
+          <a href="https://github.com/TotalyEnglizLitrate/nullform">source on GitHub</a>.
+        </p>
+      </main>
+    </div>
+  </noscript>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>
