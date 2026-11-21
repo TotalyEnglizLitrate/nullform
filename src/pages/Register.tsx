@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Busy } from "../Busy.js"
 import { SignIn } from "../SignIn.js"
 import { explain, post } from "../lib/api.js"
 import { deriveIdentity, newMaster } from "../lib/identity.js"
@@ -53,8 +54,8 @@ export function Register({ form }: { form: Form }) {
           You're registered. Come back when the owner has frozen the group and submissions open, using this same browser.
         </p>
       ) : (
-        <p><button className="primary" disabled={busy || registered === null} onClick={register}>
-          {busy ? "Registering…" : "Register"}</button></p>
+        <p><button className="primary" disabled={busy || registered === null} aria-busy={busy} onClick={register}>
+          <Busy busy={busy} idle="Register" doing="Registering" /></button></p>
       )}
       {error && <p className="error" role="alert">{error}</p>}
       {(justDone || registered) && <Backup highlight={justDone} />}

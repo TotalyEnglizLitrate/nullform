@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Busy } from "../Busy.js"
 import { checkAnchor, checkBinding, checkGroup, explorerTx, type Check, type Receipt } from "../lib/audit.js"
 import { fetchAnchorTx } from "../lib/chain.js"
 import { fetchAll, fetchLeaves } from "../lib/data.js"
@@ -20,6 +21,7 @@ export function Audit({ formId }: { formId: string }) {
   const [progress, setProgress] = useState<number | null>(null)
   const [anchorChecks, setAnchorChecks] = useState<Check[] | null>(null)
   const [anchorTime, setAnchorTime] = useState<number | null>(null)
+  const [checkingAnchor, setCheckingAnchor] = useState(false)
   const [error, setError] = useState("")
 
   useEffect(() => {
@@ -56,11 +58,13 @@ export function Audit({ formId }: { formId: string }) {
 
   async function verifyAnchor() {
     setError("")
+    setCheckingAnchor(true)
     try {
       const t = await fetchAnchorTx(form!.anchor_chain!, form!.anchor_tx!)
       setAnchorChecks(checkAnchor(form!, t, import.meta.env.VITE_ANCHOR_ADDRESS as string | undefined))
       setAnchorTime(t?.timestamp ?? null)
     } catch (e) { setError(e instanceof Error ? e.message : "Could not reach the chain") }
+    setCheckingAnchor(false)
   }
 
   const good = rows?.filter((r) => r.ok).length ?? 0
@@ -107,7 +111,7 @@ export function Audit({ formId }: { formId: string }) {
           The root was published in a blockchain transaction when the group froze. That makes it a public timestamp:
           the operator can't quietly change the group afterwards. This reads the transaction from the chain and compares it.
         </p>
-        <p><button onClick={verifyAnchor}>Check the anchor on {form.anchor_chain}</button></p>
+        <p><button onClick={verifyAnchor} disabled={checkingAnchor} aria-busy={checkingAnchor}><Busy busy={checkingAnchor} idle={`Check the anchor on ${form.anchor_chain}`} doing="Checking the chain" /></button></p>
         {anchorChecks && <ul data-testid="anchor-checks">{anchorChecks.map((c) =>
           <li key={c.name} className={c.ok ? "ok" : "error"}>{c.ok ? "Pass" : "Fail"}: {c.name}{c.detail && !c.ok ? ` (${c.detail})` : ""}</li>)}</ul>}
         {anchorTime && <p className="muted">Anchored {new Date(anchorTime * 1000).toLocaleString()}.</p>}

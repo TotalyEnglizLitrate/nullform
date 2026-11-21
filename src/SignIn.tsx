@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Busy } from "./Busy.js"
 import { authRedirectUrl, rememberReturn } from "./lib/return.js"
 import { supabase } from "./lib/supabase.js"
 
@@ -7,6 +8,7 @@ export function SignIn({ only }: { only?: "email" | "github" }) {
   const [email, setEmail] = useState("")
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [sending, setSending] = useState(false)   // the email button only, not the GitHub one
   const [error, setError] = useState("")
 
   async function run(fn: () => Promise<{ error: { message: string } | null }>) {
@@ -18,8 +20,11 @@ export function SignIn({ only }: { only?: "email" | "github" }) {
     if (error) setError(error.message)
     return !error
   }
-  const sendLink = async () => setSent(await run(() =>
-    supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: authRedirectUrl() } })))
+  const sendLink = async () => {
+    setSending(true)
+    setSent(await run(() => supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: authRedirectUrl() } })))
+    setSending(false)
+  }
 
   return (
     <div className="card">
@@ -31,7 +36,7 @@ export function SignIn({ only }: { only?: "email" | "github" }) {
             Some mail systems open links automatically and use them up; if it says the link has expired, request a new one.
           </p>
           <p className="row">
-            <button disabled={busy} onClick={sendLink}>Send again</button>
+            <button disabled={busy} aria-busy={sending} onClick={sendLink}><Busy busy={sending} idle="Send again" doing="Sending" /></button>
             <button onClick={() => setSent(false)}>Use another email</button>
           </p>
         </div>
@@ -39,7 +44,7 @@ export function SignIn({ only }: { only?: "email" | "github" }) {
         <form onSubmit={(e) => { e.preventDefault(); void sendLink() }}>
           <label htmlFor="email">Email</label>
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
-          <p><button className="primary" disabled={busy}>Email me a sign-in link</button></p>
+          <p><button className="primary" disabled={busy} aria-busy={sending}><Busy busy={sending} idle="Email me a sign-in link" doing="Sending" /></button></p>
         </form>
       ))}
       {!only && !sent && <p className="muted">or</p>}

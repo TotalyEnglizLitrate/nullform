@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { Busy } from "../Busy.js"
 import { SignIn } from "../SignIn.js"
 import { go } from "../lib/router.js"
 import { useSession } from "../lib/session.js"
@@ -198,7 +199,7 @@ export function Builder({ formId }: { formId?: string }) {
       <input id="min" type="number" min={1} value={minGroup} onChange={(e) => setMinGroup(e.target.value)} />
 
       {problems.length > 0 && <ul className="error" role="alert">{problems.map((p) => <li key={p}>{p}</li>)}</ul>}
-      <p className="row"><button className="primary" disabled={busy} onClick={save}>Save draft</button>
+      <p className="row"><button className="primary" disabled={busy} aria-busy={busy} onClick={save}><Busy busy={busy} idle="Save draft" doing="Saving" /></button>
         <button onClick={() => go("/dashboard")}>Cancel</button></p>
     </>
   )
