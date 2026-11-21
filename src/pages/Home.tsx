@@ -7,7 +7,7 @@ export function Home() {
       <p>
         Only eligible, signed-in people can <strong>register</strong> for a form. Answers are then submitted
         <strong> without signing in</strong>, with a zero-knowledge proof that the sender is one of the registered
-        members, and not which one.
+        members, and not which one. <strong>Only the answers are anonymous; registering is not.</strong>
       </p>
       <p><a href={href("/about")}>Tell me more</a></p>
       <ol>

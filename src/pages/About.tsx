@@ -9,6 +9,10 @@ export function About() {
         Nullform lets a group answer a form anonymously, while making sure that only eligible people can
         answer, and only once.
       </p>
+      <p>
+        <strong>Only the answers are anonymous.</strong> Registering is not: the site knows which account registered
+        for a form, and the owner decides who is eligible. What stays hidden is which registered member sent which answer.
+      </p>
 
       <h2>Two steps that never meet</h2>
       <ol>
