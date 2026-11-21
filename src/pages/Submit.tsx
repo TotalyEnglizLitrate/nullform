@@ -102,6 +102,7 @@ export function Submit({ form }: { form: Form }) {
               Your answers are sent without signing in, together with a proof that you're a registered member.
               {hasText && " Free-text answers can identify you by writing style or detail, so write accordingly."}
               {" "}The form owner can read every answer.
+              {" "}To keep your answer unlinkable, send it from a different network than the one you registered on, or use Tor Browser or a VPN.
             </p>
             {form.schema.questions.map((q) => (
               <fieldset key={q.id} disabled={notYet || step !== "idle"}>
