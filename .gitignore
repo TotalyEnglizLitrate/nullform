@@ -7,3 +7,9 @@ dist/
 .vercel/
 supabase/.branches
 supabase/.temp
+
+# Secrets: anything that looks like a credential file stays out of git
+*.env
+*.password
+*.key
+*.pem
