@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { ApiError, explain, post } from "../lib/api.js"
 import { deriveIdentity } from "../lib/identity.js"
 import { loadMaster } from "../lib/keystore.js"
-import { prove, type Proof } from "../lib/prover.js"
+import { prefetchCircuit, prove, type Proof } from "../lib/prover.js"
 import { fetchLeaves } from "../lib/data.js"
 import type { Form } from "../lib/types.js"
 import { canonicalize } from "../../shared/canonical.js"
@@ -50,6 +50,8 @@ export function Submit({ form }: { form: Form }) {
   }, [master, form.id])
 
   const inGroup = useMemo(() => !!(leaves && commitment && leaves.includes(commitment)), [leaves, commitment])
+  // Only members will answer, so only start the ~4 MB download once this browser is known to be in the group.
+  useEffect(() => { if (inGroup) prefetchCircuit(form.merkle_depth) }, [inGroup, form.merkle_depth])
   const hasText = form.schema.questions.some((q) => q.type === "text")
 
   async function send() {

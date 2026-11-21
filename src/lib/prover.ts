@@ -24,3 +24,21 @@ export function prove(
     worker.postMessage({ ...req, identity: identity.export() } satisfies ProveRequest)
   })
 }
+
+const prefetched = new Set<number>()
+
+/**
+ * Starts downloading the circuit files (about 4 MB) so they are already in the browser's HTTP cache when
+ * the person presses Submit. The proving worker requests the same URLs, so it finds them cached; without
+ * this, a first proof on a slow connection spends most of its time downloading. Low priority, and a
+ * failure is harmless: the worker simply fetches them itself later.
+ */
+export function prefetchCircuit(depth: number): void {
+  if (prefetched.has(depth)) return
+  prefetched.add(depth)
+  for (const ext of ["wasm", "zkey"]) {
+    fetch(`/artifacts/semaphore-${depth}.${ext}`, { priority: "low" } as RequestInit)
+      .then((r) => r.arrayBuffer())
+      .catch(() => prefetched.delete(depth))
+  }
+}
