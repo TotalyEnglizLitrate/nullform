@@ -8,6 +8,7 @@ import { href, useRoute } from "./lib/router.js"
 import { useSession } from "./lib/session.js"
 import { useTheme } from "./lib/theme.js"
 import { About } from "./pages/About.js"
+import { Anchors } from "./pages/Anchors.js"
 import { Audit } from "./pages/Audit.js"
 import { Builder } from "./pages/Builder.js"
 import { Dashboard } from "./pages/Dashboard.js"
@@ -63,6 +64,7 @@ export function App() {
           <p className="error" role="alert">{notice} <button onClick={dismissNotice}>Dismiss</button></p>
         )}
         {section === "about" ? <About />
+          : section === "anchors" ? <Anchors />
           : section === "dashboard" ? <Dashboard />
           : section === "new" ? <Builder />
           : section === "edit" && id ? <Builder formId={id} />

@@ -99,6 +99,8 @@ export function About() {
         Sepolia test network for timestamps.
       </p>
 
+      <p className="muted">The <a href={href("/anchors")}>public list of anchored groups</a> can be downloaded by anyone.</p>
+
       <p><a href={href("/")}>Back to the start</a> · <a href={href("/dashboard")}>My forms</a></p>
     </>
   )
