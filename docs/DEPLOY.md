@@ -52,6 +52,11 @@ The project already exists (`vercel link`). Set these in **Project Settings, Env
 | `ANCHOR_RPC_URL` | optional, your own RPC | no |
 | `VITE_ANCHOR_ADDRESS` | the anchor wallet's public address | yes |
 
+**Copy `SUPABASE_SECRET_KEY` from the dashboard** (Project Settings, API Keys, Secret keys). The Supabase CLI's
+`projects api-keys` lists secret keys *masked* with dots, and a masked copy makes every request fail with
+"Invalid API key". The server now refuses such a value with a clear log message, and reports a rejected key as
+`server_misconfigured` (HTTP 500) instead of "unauthenticated".
+
 Anything prefixed `VITE_` is compiled into the public bundle. Never give a secret that prefix.
 Mark `SUPABASE_SECRET_KEY` and `ANCHOR_PRIVATE_KEY` as **Sensitive**.
 
