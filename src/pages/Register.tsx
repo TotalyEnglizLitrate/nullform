@@ -9,7 +9,7 @@ import { supabase } from "../lib/supabase.js"
 import type { Form } from "../lib/types.js"
 import { Backup } from "./Backup.js"
 
-const METHOD = { email: "an email code", github: "GitHub" } as const
+const METHOD = { email: "email", github: "GitHub" } as const
 
 export function Register({ form }: { form: Form }) {
   const session = useSession()

@@ -12,7 +12,7 @@ export const emailProvider: AuthProvider = {
   id: "email",
   methods: ["otp", "magiclink"],
   identify(user, policy) {
-    // The one-time code proves control of the inbox; refuse unconfirmed addresses regardless.
+    // Following the emailed sign-in link proves control of the inbox; refuse unconfirmed addresses regardless.
     if (!user.email || !user.email_confirmed_at) return null
     const strip = policy.provider === "email" && policy.stripPlusTag === true
     const normalized = normalizeEmail(user.email, strip)

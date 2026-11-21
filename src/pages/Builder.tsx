@@ -176,7 +176,7 @@ export function Builder({ formId }: { formId?: string }) {
       <p className="muted">One sign-in method per form, so nobody can register twice through two methods.</p>
       <label htmlFor="prov">Sign-in method</label>
       <select id="prov" value={provider} onChange={(e) => setProv(e.target.value as "email" | "github")}>
-        <option value="email">Email code</option><option value="github">GitHub</option>
+        <option value="email">Email</option><option value="github">GitHub</option>
       </select>
       <label htmlFor="mode">Eligibility</label>
       <select id="mode" value={mode} onChange={(e) => setMode(e.target.value)}>
