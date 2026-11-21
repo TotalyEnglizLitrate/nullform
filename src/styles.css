@@ -4,7 +4,8 @@
   --bg: light-dark(#fbfbfa, #141413);
   --fg: light-dark(#1a1a19, #ececea);
   --muted: light-dark(#6b6b68, #9a9a95);
-  --line: light-dark(#dcdcd7, #2e2e2b);
+  --line: light-dark(#dcdcd7, #2e2e2b);   /* decorative dividers and card borders */
+  --control: light-dark(#8a8a85, #7a7a75); /* control outlines: 3:1 against the page, as WCAG 1.4.11 asks */
   --accent: light-dark(#2b59c3, #7aa2ff);
   --accent-fg: light-dark(#fff, #0b1020);
   --danger: light-dark(#b3261e, #ff8a80);
@@ -25,11 +26,11 @@ a { color: var(--accent); }
 .brand { font-weight: 700; color: var(--fg); text-decoration: none; }
 .muted { color: var(--muted); } .error { color: var(--danger); } .ok { color: var(--ok); }
 button, input, select, textarea { font: inherit; color: inherit; }
-button { padding: .45rem .9rem; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; }
+button { padding: .45rem .9rem; border: 1px solid var(--control); border-radius: 6px; background: var(--panel); cursor: pointer; }
 button.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 button:disabled { opacity: .55; cursor: not-allowed; }
 input[type=text], input[type=email], input[type=number], input[type=datetime-local], select, textarea {
-  width: 100%; padding: .45rem .6rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
+  width: 100%; padding: .45rem .6rem; border: 1px solid var(--control); border-radius: 6px; background: var(--bg); }
 textarea { min-height: 5rem; resize: vertical; }
 label { display: block; margin: .75rem 0 .25rem; font-weight: 600; }
 label.inline { display: inline-flex; gap: .4rem; align-items: center; font-weight: 400; margin-right: 1rem; }
