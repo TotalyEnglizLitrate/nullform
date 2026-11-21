@@ -1,17 +1,19 @@
 # Deploying Nullform
 
 Hosting: **Vercel** serves the SPA and the three Node functions in `api/`. **Supabase** provides
-Postgres and Auth. **GitHub Actions** (`.github/workflows/ci.yml`) tests every push and pull request,
+Postgres and Auth. **GitHub Actions** (`.github/workflows/ci.yml`) tests every push to `main`,
 and deploys `main` to production once the tests pass.
 
 ```
-push / PR ──► test job: typecheck, local Supabase + Anvil, unit + integration tests, build
-push to main ──► deploy job: supabase db push ──► vercel build ──► vercel deploy --prod
+push to main ──► test job: typecheck, local Supabase + Anvil, unit + integration tests, build
+              └─► deploy job: supabase db push ──► vercel build ──► vercel deploy --prod
 ```
 
 Vercel's own Git integration is switched off (`git.deploymentEnabled: false` in `vercel.json`), so
-nothing reaches production without passing CI. Pull requests get CI only, no preview deployment:
-previews would share the production database. Add Supabase branching or a second project first.
+nothing reaches production without passing CI. There is no pull-request workflow and no preview
+deployment (this is a solo project, and previews would share the production database). If that
+changes, add a `pull_request` trigger for the test job, and use Supabase branching or a second
+project before adding previews.
 
 ## One-time setup
 

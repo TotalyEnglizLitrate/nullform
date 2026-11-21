@@ -3,19 +3,19 @@ name: CI
 on:
   push:
     branches: [main]
-  pull_request:
 
 permissions:
   contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # A newer push supersedes an older test run. Scoped to this job on purpose: a deploy that has
+    # started (migrations applied, Vercel build running) must never be cancelled halfway.
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
     env:
       # `supabase start` reads these placeholders from supabase/config.toml; OAuth isn't exercised in CI.
       SUPABASE_AUTH_GITHUB_CLIENT_ID: placeholder
