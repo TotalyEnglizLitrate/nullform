@@ -33,3 +33,8 @@ fieldset { border: 1px solid var(--line); border-radius: 8px; margin: .75rem 0; 
 code, .mono { font: .85rem ui-monospace, monospace; word-break: break-all; }
 .badge { font-size: .75rem; border: 1px solid var(--line); border-radius: 99px; padding: .05rem .5rem; color: var(--muted); }
 progress { width: 100%; }
+.bar-row { display: grid; grid-template-columns: minmax(5rem, 30%) 1fr 6.5rem; gap: .6rem; align-items: center; margin: .3rem 0; }
+.bar-track { height: .7rem; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar-fill { display: block; height: 100%; background: var(--accent); }
+.bar-count { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+@media (max-width: 30rem) { .bar-row { grid-template-columns: 1fr 5rem; } .bar-track { grid-column: 1 / -1; order: 3; } }

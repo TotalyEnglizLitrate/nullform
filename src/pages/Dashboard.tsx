@@ -60,7 +60,7 @@ export function Dashboard() {
             {f.status === "draft" && <><a href={href(`/edit/${f.id}`)}>Edit</a>
               <button onClick={() => act(f, "open")}>Open registration</button></>}
             {f.status === "registration" && <button onClick={() => act(f, "freeze")}>Freeze group</button>}
-            {(f.status === "frozen" || f.status === "closed") && f.root && <a href={href(`/audit/${f.id}`)}>Audit</a>}
+            {(f.status === "frozen" || f.status === "closed") && f.root && <><a href={href(`/results/${f.id}`)}>Results</a><a href={href(`/audit/${f.id}`)}>Audit</a></>}
             {(f.status === "frozen" || f.status === "closed") && f.root && !f.anchor_tx &&
               <button onClick={() => act(f, "anchor")}>Anchor now</button>}
             {f.anchor_tx && (explorerTx(f.anchor_chain, f.anchor_tx)
