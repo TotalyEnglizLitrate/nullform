@@ -16,8 +16,8 @@ previews would share the production database. Add Supabase branching or a second
 ## One-time setup
 
 ### 1. Supabase (hosted)
-1. Create a project. Pick a region close to the Vercel functions (default `iad1`; change `regions`
-   in `vercel.json` to match).
+1. Create a project. Pick a region close to the Vercel functions (this project uses Mumbai, `ap-south-1`,
+   with Vercel's `bom1` set in `vercel.json`; the region can't be changed after creation).
 2. Auth, URL configuration: set **Site URL** to the production URL, and add it to the redirect list.
 3. Auth, Providers: enable **Email** (OTP, 6 digits) and **GitHub** (create an OAuth app on GitHub
    whose callback is `https://<project-ref>.supabase.co/auth/v1/callback`).
