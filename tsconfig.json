@@ -11,10 +11,6 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": [
-      "node",
-      "vite/client"
-    ],
     "jsx": "react-jsx"
   },
   "include": [
