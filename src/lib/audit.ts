@@ -1,7 +1,7 @@
 import { Group } from "@semaphore-protocol/group"
 import { decodeAnchorData } from "../../shared/anchor.js"
 import { scopeFromFormId } from "../../shared/hash.js"
-import { isCommitment, sortLeaves } from "../../shared/leaves.js"
+import { isCommitment, isFieldElement, sortLeaves } from "../../shared/leaves.js"
 import type { Proof } from "./prover.js"
 import type { AnchorTx } from "./chain.js"
 import type { Form } from "./types.js"
@@ -44,6 +44,7 @@ export function checkGroup(form: Pick<Form, "root" | "leaf_count">, leaves: stri
  */
 export async function checkBinding(form: Pick<Form, "id" | "root" | "merkle_depth">, r: Receipt): Promise<string | null> {
   const p = r.proof
+  if (!isFieldElement(r.nullifier)) return "nullifier is not written as a canonical number"
   if (p.merkleTreeRoot !== form.root) return "proof is for a different group root"
   if (p.merkleTreeDepth !== form.merkle_depth) return "wrong tree depth"
   if (p.scope !== (await scopeFromFormId(form.id))) return "proof is for a different form"
@@ -74,4 +75,18 @@ export function checkAnchor(
   ]
   if (expectedSender) checks.push({ name: "Sent by the expected anchor wallet", ok: tx.from.toLowerCase() === expectedSender.toLowerCase(), detail: tx.from })
   return checks
+}
+
+/**
+ * Indexes of receipts whose nullifier is numerically the same as another receipt's. Each member gets exactly one
+ * nullifier per form, so a repeat means a double submission got through, however the number was spelled.
+ */
+export function duplicateNullifiers(receipts: Pick<Receipt, "nullifier">[]): Set<number> {
+  const byValue = new Map<string, number[]>()
+  receipts.forEach((r, i) => {
+    let key: string
+    try { key = BigInt(r.nullifier).toString() } catch { key = `text:${r.nullifier}` }
+    byValue.set(key, [...(byValue.get(key) ?? []), i])
+  })
+  return new Set([...byValue.values()].filter((g) => g.length > 1).flat())
 }

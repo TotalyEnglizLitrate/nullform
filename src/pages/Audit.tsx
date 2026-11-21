@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Busy } from "../Busy.js"
-import { checkAnchor, checkBinding, checkGroup, explorerTx, type Check, type Receipt } from "../lib/audit.js"
+import { checkAnchor, checkBinding, duplicateNullifiers, checkGroup, explorerTx, type Check, type Receipt } from "../lib/audit.js"
 import { fetchAnchorTx } from "../lib/chain.js"
 import { fetchAll, fetchLeaves } from "../lib/data.js"
 import { href } from "../lib/router.js"
@@ -50,7 +50,9 @@ export function Audit({ formId }: { formId: string }) {
     try {
       const binding = await Promise.all(receipts!.map((r) => checkBinding(form!, r)))
       const proofs = await verifyAll(receipts!.map((r) => r.proof), setProgress)
+      const repeats = duplicateNullifiers(receipts!)
       setRows(receipts!.map((_, i) => binding[i] ? { ok: false, why: binding[i]! }
+        : repeats.has(i) ? { ok: false, why: "same nullifier as another receipt (a double submission)" }
         : proofs[i] ? { ok: true } : { ok: false, why: "zero-knowledge proof is invalid" }))
     } catch (e) { setError(e instanceof Error ? e.message : "Verification failed") }
     setProgress(null)

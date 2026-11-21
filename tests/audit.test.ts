@@ -2,7 +2,7 @@ import { Identity } from "@semaphore-protocol/identity"
 import { verifyProof } from "@semaphore-protocol/proof"
 import { describe, expect, it } from "vitest"
 import { encodeAnchorData } from "../shared/anchor.js"
-import { checkAnchor, checkBinding, checkGroup, computeRoot, explorerTx, type Receipt } from "../src/lib/audit.js"
+import { checkAnchor, checkBinding, checkGroup, computeRoot, duplicateNullifiers, explorerTx, type Receipt } from "../src/lib/audit.js"
 import { scopeFromFormId, signalFromPayload } from "../shared/hash.js"
 import { makeProof } from "./helpers.js"
 
@@ -71,6 +71,28 @@ describe("anchor checks", () => {
     expect(failing(tx({ input: encodeAnchorData(FORM, "1") }))).toEqual(["Anchored root equals the published root"])
     expect(failing(tx({ to: "0x0000000000000000000000000000000000000002" }))).toEqual(["Sent from the wallet to itself"])
     expect(failing(tx(), "0x0000000000000000000000000000000000000009")).toEqual(["Sent by the expected anchor wallet"])
+  })
+})
+
+describe("double-submission detection on the audit page", () => {
+  const r = (nullifier: string) => ({ nullifier })
+  it("flags receipts whose nullifiers are the same number, however spelled", () => {
+    expect([...duplicateNullifiers([r("5"), r("7"), r("05"), r("9")])].sort()).toEqual([0, 2])
+    expect([...duplicateNullifiers([r("5"), r("7"), r("5")])].sort()).toEqual([0, 2])
+  })
+  it("reports nothing when every nullifier is different", () => {
+    expect(duplicateNullifiers([r("1"), r("2"), r("3")]).size).toBe(0)
+    expect(duplicateNullifiers([]).size).toBe(0)
+  })
+  it("treats unparseable nullifiers as their own text instead of crashing", () => {
+    expect([...duplicateNullifiers([r("abc"), r("abc"), r("4")])].sort()).toEqual([0, 1])
+  })
+  it("rejects a receipt whose nullifier is not in canonical form", async () => {
+    const proof = await makeProof(ids[0]!, leaves, { q1: "o1" }, FORM)
+    const form = { id: FORM, root: computeRoot(leaves), merkle_depth: 10 }
+    const padded = "0" + proof.nullifier
+    const receipt: Receipt = { nullifier: padded, signal: await signalFromPayload({ q1: "o1" }), proof: { ...proof, nullifier: padded }, submitted_hour: "" }
+    expect(await checkBinding(form, receipt)).toMatch(/canonical/)
   })
 })
 
